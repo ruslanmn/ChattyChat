@@ -1,8 +1,8 @@
-package controllers;
+package chattychat.controllers;
 
 
-import controllers.pojo.Greeting;
-import controllers.pojo.NameInfo;
+import chattychat.controllers.pojo.Greeting;
+import chattychat.controllers.pojo.NameInfo;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
@@ -16,7 +16,7 @@ public class GreetingController {
     @SendTo("/topic/greetings")
     public Greeting greeting(NameInfo nameInfo) throws Exception {
         Thread.sleep(1000); // simulated delay
-        return new Greeting("Hello, " + HtmlUtils.htmlEscape(nameInfo.getName()) + "!");
+        return new Greeting("Hello, " + nameInfo.getName() + "!");
     }
 
 }

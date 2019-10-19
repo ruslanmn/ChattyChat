@@ -1,4 +1,4 @@
-package controllers.pojo;
+package chattychat.controllers.pojo;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
