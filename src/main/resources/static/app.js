@@ -1,45 +1,34 @@
 var stompClient = null;
-var messagesDiv = null;
 
-function setConnected(connected) {
-    $("#connect").prop("disabled", connected);
-    $("#disconnect").prop("disabled", !connected);
-    if (connected) {
-        $("#conversation").show();
-    }
-    else {
-        $("#conversation").hide();
-    }
-    $("#greetings").html("");
-}
+
+var chatHistory = null;
+var messageText = null;
 
 function connect() {
-    var socket = new SockJS('/websocket');
+    let socket = new SockJS('/websocket');
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function (frame) {
-        setConnected(true);
         console.log('Connected: ' + frame);
-        stompClient.subscribe('/topic/greetings', function (message) {
-            addMessage(message);
+        stompClient.subscribe('/topic/messages', function (data) {
+            addMessage(JSON.parse(data.body));
         });
     });
 }
 
 function addMessage(message) {
-    messagesDiv.append(`<div><b>${message.sender}</b>: ${message.text}</div>`);
-    messagesDiv[0].scrollTo(messagesDiv[0].scrollHeight);
+    chatHistory.append(`<div><b>${message.sender}</b>: ${message.text}</div>`);
+    chatHistory[0].scrollTop = chatHistory[0].scrollHeight;
 }
 
-function disconnect() {
-    if (stompClient !== null) {
-        stompClient.disconnect();
+function sendMessage() {
+    let text = messageText.val();
+    if (text) {
+        let message = {};
+        message.text = text;
+        stompClient.send("/app/add-message", {}, JSON.stringify(message));
+
+        messageText.val('');
     }
-    setConnected(false);
-    console.log("Disconnected");
-}
-
-function sendName() {
-    stompClient.send("/app/hello", {}, JSON.stringify({'name': $("#name").val()}));
 }
 
 function showGreeting(message) {
@@ -47,18 +36,10 @@ function showGreeting(message) {
 }
 
 $(function () {
-    $("form").on('submit', function (e) {
-        e.preventDefault();
-    });
-    $( "#connect" ).click(function() { connect(); });
-    $( "#disconnect" ).click(function() { disconnect(); });
-    $( "#send" ).click(function() {
-        var message = {};
-        message.sender = "Ruslan";
-        message.text = "Hello";
-        addMessage(message);
-    });
+    connect();
+    $( "#send" ).click(sendMessage);
 
-    messagesDiv = $("#messages")
+    chatHistory = $("#chatHistory");
+    messageText = $("#messageText");
 });
 
